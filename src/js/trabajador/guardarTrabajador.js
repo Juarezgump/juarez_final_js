@@ -8,7 +8,6 @@ const btnCancelar = document.getElementById('btnCancelar')
 
 divTabla.classList.add('d-none')
 
-
 const guardar = async(e) => {
    e.preventDefault()
    
@@ -27,6 +26,10 @@ const data = await respuesta.json()
 console.log(data)
 if(data.codigo == 1){
     alert(data.mensaje)
+    formTrabajador.reset() // Limpiar el formulario después de guardar
+    
+    // Actualizar la tabla automáticamente
+    buscar(new Event('click'))
 }else{
     alert(data.mensaje)
 }
@@ -53,7 +56,10 @@ const buscar = async(e) => {
     tbody.innerHTML = '';
     
     if(data.codigo == 1){
-        alert('Se encontraron los datos')
+        // Solo mostrar alerta si no fue llamado desde la función guardar
+        if(e.type === 'click') {
+            alert('Se encontraron los datos')
+        }
         divTabla.classList.remove('d-none')
         data.datos.forEach((t, index) => {
             const row = document.createElement("tr");
@@ -120,8 +126,6 @@ window.Asignar = async(tra_id) => {
     btnModificar.classList.remove('d-none');
     btnCancelar.classList.remove('d-none');
 }
-
-
 
 const Modificar = async(e) => {
     e.preventDefault();

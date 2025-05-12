@@ -28,6 +28,9 @@ const guardar = async(e) => {
     if(data.codigo == 1){
         alert(data.mensaje)
         formCasa.reset()
+        
+        // Actualizar la tabla automáticamente
+        buscar(new Event('click'))
     }else{
         alert(data.mensaje)
     }
@@ -54,7 +57,10 @@ const buscar = async(e) => {
     tbody.innerHTML = ''
     
     if(data.codigo == 1 && data.datos && data.datos.length > 0){
-        alert('Se encontraron los datos')
+        // Solo mostrar alerta si no fue llamado desde la función guardar
+        if(e.type === 'click') {
+            alert('Se encontraron los datos')
+        }
         divTabla.classList.remove('d-none')
         data.datos.forEach((c, index) => {
             const row = document.createElement("tr")
@@ -84,7 +90,7 @@ const buscar = async(e) => {
         row.innerHTML = `<td colspan="6" class="text-center">No hay casas/proveedores registrados</td>`
         tbody.appendChild(row)
         divTabla.classList.remove('d-none')
-        if (data.codigo == 0) {
+        if (data.codigo == 0 && e.type === 'click') {
             alert(data.mensaje)
         }
     }

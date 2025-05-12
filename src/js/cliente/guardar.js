@@ -8,7 +8,6 @@ const btnCancelar = document.getElementById('btnCancelar')
 
 divTabla.classList.add('d-none')
 
-
 const guardar = async(e) => {
    e.preventDefault()
    
@@ -27,6 +26,13 @@ const data = await respuesta.json()
 console.log(data)
 if(data.codigo == 1){
     alert(data.mensaje)
+    formCliente.reset() // Limpiar el formulario después de guardar
+    
+    // Actualizar la tabla automáticamente
+    buscar(new Event('click'))
+    
+    // Actualizar noticias
+    cargarNoticias()
 }else{
     alert(data.mensaje)
 }
@@ -53,7 +59,10 @@ const buscar = async(e) => {
     tbody.innerHTML = '';
     
     if(data.codigo == 1){
-        alert('Se encontraron los datos')
+        // Solo mostrar alerta si no fue llamado desde la función guardar
+        if(e.type === 'click') {
+            alert('Se encontraron los datos')
+        }
         divTabla.classList.remove('d-none')
         data.datos.forEach((c, index) => {
             const row = document.createElement("tr");
@@ -86,6 +95,10 @@ const buscar = async(e) => {
         const row = document.createElement("tr");
         row.innerHTML = `<td colspan="10">No hay clientes registrados</td>`;
         tbody.appendChild(row);
+        divTabla.classList.remove('d-none')
+        if (data.codigo == 0 && e.type === 'click') {
+            alert(data.mensaje)
+        }
     }
 }
 
@@ -145,7 +158,7 @@ const Modificar = async(e) => {
         btnBuscar.classList.remove('d-none');
         btnguardar.classList.remove('d-none');
         btnModificar.classList.add('d-none');
-        btnCancelar.classList.add('d-none');
+        btnCancelar.classList.remove('d-none');
         
         alert(data.mensaje);
     } else {
@@ -158,9 +171,78 @@ btnCancelar.addEventListener('click', () => {
     btnBuscar.classList.remove('d-none');
     btnguardar.classList.remove('d-none');
     btnModificar.classList.add('d-none');
-    btnCancelar.classList.add('d-none');
+    btnCancelar.classList.remove('d-none');
 });
 
 formCliente.addEventListener('submit', guardar);
 btnBuscar.addEventListener('click', buscar);
 btnModificar.addEventListener('click', Modificar);
+
+
+//API para obtener noticias desde Hacker.news
+const cargarNoticias = async() => {
+    const noticiasContainer = document.getElementById('noticias-salud');
+    if (!noticiasContainer) return;
+    
+    noticiasContainer.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Cargando noticias...</span>
+            </div>
+        </div>
+    `;
+    
+    try {
+        const topStoriesResponse = await fetch('https://hacker-news.firebaseio.com/v0/topstories.json');
+        const topStories = await topStoriesResponse.json();
+        
+        const storyPromises = topStories.slice(0, 3).map(id => 
+            fetch(`https://hacker-news.firebaseio.com/v0/item/${id}.json`)
+                .then(response => response.json())
+        );
+        
+        const stories = await Promise.all(storyPromises);
+        
+        if (stories.length > 0) {
+            let html = '';
+            
+            stories.forEach(story => {
+                const fecha = new Date(story.time * 1000).toLocaleDateString('es-MX');
+                
+                html += `
+                    <div class="card mb-3 border-0 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">${story.title}</h5>
+                            <p class="card-text">
+                                <small class="text-muted">Por: ${story.by} - ${fecha}</small>
+                            </p>
+                            <p class="card-text">
+                                <span class="badge bg-info">${story.score} puntos</span>
+                                <span class="badge bg-secondary">${story.descendants || 0} comentarios</span>
+                            </p>
+                            <a href="${story.url || `https://news.ycombinator.com/item?id=${story.id}`}" 
+                               target="_blank" class="btn btn-sm btn-outline-success">Leer más</a>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            noticiasContainer.innerHTML = html;
+        } else {
+            noticiasContainer.innerHTML = `
+                <div class="alert alert-info">
+                    No se encontraron noticias en este momento.
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error al cargar noticias:', error);
+        noticiasContainer.innerHTML = `
+            <div class="alert alert-warning">
+                Actualmente no podemos mostrar noticias. Por favor, intente más tarde.
+            </div>
+        `;
+    }
+}
+
+document.addEventListener('DOMContentLoaded', cargarNoticias);

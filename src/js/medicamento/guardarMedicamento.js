@@ -8,7 +8,6 @@ const btnCancelar = document.getElementById('btnCancelar')
 
 divTabla.classList.add('d-none')
 
-
 const guardar = async(e) => {
    e.preventDefault()
    
@@ -27,6 +26,9 @@ const data = await respuesta.json()
 console.log(data)
 if(data.codigo == 1){
     alert(data.mensaje)
+    formMedicamento.reset() 
+    
+    buscar(new Event('click'))
 }else{
     alert(data.mensaje)
 }
@@ -53,7 +55,9 @@ const buscar = async(e) => {
     tbody.innerHTML = '';
     
     if(data.codigo == 1){
-        alert('Se encontraron los datos')
+        if(e.type === 'click') {
+            alert('Se encontraron los datos')
+        }
         divTabla.classList.remove('d-none')
         data.datos.forEach((m, index) => {
             const row = document.createElement("tr");
@@ -117,7 +121,6 @@ window.Asignar = async(med_id) => {
     btnCancelar.classList.remove('d-none');
 }
 
-
 const Modificar = async(e) => {
     e.preventDefault();
     
@@ -159,6 +162,9 @@ btnCancelar.addEventListener('click', () => {
     btnModificar.classList.add('d-none');
     btnCancelar.classList.add('d-none');
 });
+
+
+
 
 formMedicamento.addEventListener('submit', guardar);
 btnBuscar.addEventListener('click', buscar);
