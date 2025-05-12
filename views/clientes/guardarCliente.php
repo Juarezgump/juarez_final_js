@@ -90,7 +90,7 @@ if(isset($_GET['error'])) {
         <div class="col-lg-4 col-md-12">
             <div class="card h-100">
                 <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">Noticias de Salud</h5>
+                    <h5 class="mb-0">Noticias Diarias</h5>
                 </div>
                 <div class="card-body" id="noticias-salud">
                     <p class="text-center">
